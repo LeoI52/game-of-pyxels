@@ -10,6 +10,8 @@ import math
 import sys
 import os
 
+BLINKER = [[1],[1],[1]]
+
 DEFAULT_PYXEL_COLORS = [0x000000, 0x2B335F, 0x7E2072, 0x19959C, 0x8B4852, 0x395C98, 0xA9C1FF, 0xEEEEEE, 0xD4186C, 0xD38441, 0xE9C35B, 0x70C6A9, 0x7696DE, 0xA3A3A3, 0xFF9798, 0xEDC7B0]
 
 characters_matrices = {
@@ -586,8 +588,9 @@ class Game:
         self.pause = True
         self.cell_map = self.create_empty_list()
         self.next_generation = self.create_empty_list()
-        self.speed = 20
+        self.speed = 10
         self.time = 0
+        self.current_prefab = 0
 
         self.pyxel_manager.run()
 
@@ -601,6 +604,34 @@ class Game:
 
     def play_action(self):
         self.pyxel_manager.change_scene_dither(1, 0.05, 7)
+
+    def draw_game_cursor(self):
+        if self.current_prefab != 0:
+            for y in range(len(self.current_prefab)):
+                for x in range(len(self.current_prefab[y])):
+                    if self.current_prefab[y][x] == 1:
+                        pyxel.pset(pyxel.mouse_x + x, pyxel.mouse_y + y, 7)
+        else:
+            pyxel.pset(pyxel.mouse_x, pyxel.mouse_y, 7)
+
+    def update_mouse_click(self):
+        if pyxel.btn(pyxel.MOUSE_BUTTON_LEFT):
+            if self.current_prefab != 0:
+                for y in range(len(self.current_prefab)):
+                    for x in range(len(self.current_prefab[y])):
+                        if self.current_prefab[y][x] == 1:
+                            self.cell_map[pyxel.mouse_y + y][pyxel.mouse_x + x] = 1
+            else:
+                self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 1
+
+        if pyxel.btn(pyxel.MOUSE_BUTTON_RIGHT):
+            if self.current_prefab != 0:
+                for y in range(len(self.current_prefab)):
+                    for x in range(len(self.current_prefab[y])):
+                        if self.current_prefab[y][x] == 1:
+                            self.cell_map[pyxel.mouse_y + y][pyxel.mouse_x + x] = 0
+            else:
+                self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 0
 
     def update_main_menu(self):
         self.title.update()
@@ -627,10 +658,8 @@ class Game:
         if pyxel.btnp(pyxel.KEY_SPACE):
             self.pause = not self.pause
 
-        if self.pause and pyxel.btn(pyxel.MOUSE_BUTTON_LEFT):
-            self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 1
-        elif self.pause and pyxel.btn(pyxel.MOUSE_BUTTON_RIGHT):
-            self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 0
+        if self.pause:
+            self.update_mouse_click()
 
         if self.time < self.speed:
             self.time += 1
@@ -677,8 +706,7 @@ class Game:
 
         if self.pause:
             pyxel.blt(2, 2, 0, 8, 8, 8, 14, 0)
-
-            pyxel.pset(pyxel.mouse_x, pyxel.mouse_y, 7)
+            self.draw_game_cursor()
         else:
             pyxel.blt(2, 2, 0, 0, 8, 8, 14, 0)
 

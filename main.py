@@ -11,6 +11,54 @@ import sys
 import os
 
 BLINKER = [[1],[1],[1]]
+CROSS = [[0,0,1,1,1,1,0,0],[0,0,1,0,0,1,0,0],[1,1,1,0,0,1,1,1],[1,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,1],[1,1,1,0,0,1,1,1],[0,0,1,0,0,1,0,0],[0,0,1,1,1,1,0,0]]
+LWSS = [[1,0,0,1,0],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,1]]
+GLIDER = [[0,1,0],[0,0,1],[1,1,1]]
+ACORN = [[0,1,0,0,0,0,0],[0,0,0,1,0,0,0],[1,1,0,0,1,1,1]]
+GOSPER_GLIDER_GUN = [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+]
+COE_SHIP = [
+    [0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
+    [0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0],
+    [1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,1],
+    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0],
+    [0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0],
+    [0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]
+]
+TUMBLER = [
+    [0,1,1,0,1,1,0],
+    [0,1,1,0,1,1,0],
+    [0,0,1,0,1,0,0],
+    [1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1],
+    [1,1,0,0,0,1,1]
+]
+GARDEN_OF_EDEN_1 = [
+    [0,0,1,1,1,1,1,1,1,0,0],
+    [0,1,0,1,1,1,1,1,0,1,0],
+    [1,0,1,1,1,1,1,1,1,0,1],
+    [1,1,1,1,0,0,0,1,1,1,1],
+    [1,1,1,0,0,0,0,0,1,1,1],
+    [1,1,1,0,0,0,0,0,1,1,1],
+    [1,1,1,1,0,0,0,1,1,1,1],
+    [1,0,1,1,1,1,1,1,1,0,1],
+    [0,1,0,1,1,1,1,1,0,1,0],
+    [0,0,1,1,1,1,1,1,1,0,0]
+]
 
 DEFAULT_PYXEL_COLORS = [0x000000, 0x2B335F, 0x7E2072, 0x19959C, 0x8B4852, 0x395C98, 0xA9C1FF, 0xEEEEEE, 0xD4186C, 0xD38441, 0xE9C35B, 0x70C6A9, 0x7696DE, 0xA3A3A3, 0xFF9798, 0xEDC7B0]
 
@@ -633,6 +681,28 @@ class Game:
             else:
                 self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 0
 
+    def update_selection(self):
+        if pyxel.btnp(pyxel.KEY_0):
+            self.current_prefab = 0
+        elif pyxel.btnp(pyxel.KEY_1):
+            self.current_prefab = BLINKER
+        elif pyxel.btnp(pyxel.KEY_2):
+            self.current_prefab = CROSS
+        elif pyxel.btnp(pyxel.KEY_3):
+            self.current_prefab = LWSS
+        elif pyxel.btnp(pyxel.KEY_4):
+            self.current_prefab = GLIDER
+        elif pyxel.btnp(pyxel.KEY_5):
+            self.current_prefab = ACORN
+        elif pyxel.btnp(pyxel.KEY_6):
+            self.current_prefab = GOSPER_GLIDER_GUN
+        elif pyxel.btnp(pyxel.KEY_7):
+            self.current_prefab = COE_SHIP
+        elif pyxel.btnp(pyxel.KEY_8):
+            self.current_prefab = TUMBLER
+        elif pyxel.btnp(pyxel.KEY_9):
+            self.current_prefab = GARDEN_OF_EDEN_1
+
     def update_main_menu(self):
         self.title.update()
         self.play_button.update()
@@ -646,6 +716,8 @@ class Game:
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
 
     def update_game(self):
+        self.update_selection()
+
         if pyxel.mouse_wheel > 0:
             self.speed = min(30, self.speed + pyxel.mouse_wheel)
         elif pyxel.mouse_wheel < 0:
@@ -702,13 +774,13 @@ class Game:
                 if self.cell_map[y][x] == 1:
                     pyxel.pset(x, y, 7)
 
-        pyxel.text(2, 18, f"{self.speed}", 7)
+        pyxel.text(2, 11, f"{self.speed}", 7)
 
         if self.pause:
-            pyxel.blt(2, 2, 0, 8, 8, 8, 14, 0)
+            pyxel.blt(2, 2, 0, 12, 0, 4, 7, 0)
             self.draw_game_cursor()
         else:
-            pyxel.blt(2, 2, 0, 0, 8, 8, 14, 0)
+            pyxel.blt(2, 2, 0, 8, 0, 4, 7, 0)
 
 if __name__ == "__main__":
     Game()

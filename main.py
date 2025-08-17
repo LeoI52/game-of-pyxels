@@ -630,8 +630,11 @@ class Game:
 
         self.pyxel_manager = PyxelManager(128, 96, scenes, 0)
 
+        self.background = random.choice([0,1,2,3,4,8,9,10])
+
         self.title = Text("Game of Pyxels", 64, 10, [7,9,10], 1, ANCHOR_TOP, color_mode=RANDOM_COLOR_MODE, color_speed=10, wavy=True, shadow=True, shadow_offset=2)
         self.play_button = Button("Play", 64, 54, 1, [7,9,10], 5, [7,9,10], 1, True, 10, RANDOM_COLOR_MODE, anchor=ANCHOR_CENTER, command=self.play_action)
+        self.background_button = Button("Background", 64, 74, 1, [7,9,10], 5, [7,9,10], 1, True, 10, RANDOM_COLOR_MODE, anchor=ANCHOR_CENTER, command=self.background_action)
 
         self.pause = True
         self.cell_map = self.create_empty_list()
@@ -651,7 +654,11 @@ class Game:
         return lst
 
     def play_action(self):
+        pyxel.play(0, 0)
         self.pyxel_manager.change_scene_dither(1, 0.05, 7)
+
+    def background_action(self):
+        self.background = random.choice([0,1,2,3,4,8,9,10])
 
     def draw_game_cursor(self):
         if self.current_prefab != 0:
@@ -706,12 +713,14 @@ class Game:
     def update_main_menu(self):
         self.title.update()
         self.play_button.update()
+        self.background_button.update()
 
     def draw_main_menu(self):
-        pyxel.cls(1)
+        pyxel.cls(self.background)
 
         self.title.draw()
         self.play_button.draw()
+        self.background_button.draw()
 
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
 
@@ -728,6 +737,7 @@ class Game:
             self.next_generation = self.create_empty_list()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
+            pyxel.play(0, 0)
             self.pause = not self.pause
 
         if self.pause:
@@ -759,6 +769,7 @@ class Game:
                         elif self.cell_map[y][x] == 1 and neighbors > 3:
                             self.next_generation[y][x] = 0
                         elif self.cell_map[y][x] == 0 and neighbors == 3:
+                            pyxel.play(random.randint(1, 3), random.randint(1, 4))
                             self.next_generation[y][x] = 1
                         else:
                             self.next_generation[y][x] = self.cell_map[y][x]
@@ -767,7 +778,7 @@ class Game:
             self.next_generation = self.create_empty_list()
 
     def draw_game(self):
-        pyxel.cls(1)
+        pyxel.cls(self.background)
 
         for y in range(len(self.cell_map)):
             for x in range(len(self.cell_map[y])):

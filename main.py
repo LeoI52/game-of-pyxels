@@ -584,8 +584,20 @@ class Game:
         self.play_button = Button("Play", 64, 54, 1, [7,9,10], 5, [7,9,10], 1, True, 10, RANDOM_COLOR_MODE, anchor=ANCHOR_CENTER, command=self.play_action)
 
         self.pause = True
+        self.cell_map = self.create_empty_list()
+        self.next_generation = self.create_empty_list()
+        self.speed = 20
+        self.time = 0
 
         self.pyxel_manager.run()
+
+    def create_empty_list(self):
+        lst = []
+        for y in range(pyxel.height):
+            lst.append([])
+            for x in range(pyxel.width):
+                lst[y].append(0)
+        return lst
 
     def play_action(self):
         self.pyxel_manager.change_scene_dither(1, 0.05, 7)
@@ -603,11 +615,65 @@ class Game:
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
 
     def update_game(self):
+        if pyxel.mouse_wheel > 0:
+            self.speed = min(30, self.speed + pyxel.mouse_wheel)
+        elif pyxel.mouse_wheel < 0:
+            self.speed = max(1, self.speed + pyxel.mouse_wheel)
+
+        if pyxel.btnp(pyxel.KEY_R):
+            self.cell_map = self.create_empty_list()
+            self.next_generation = self.create_empty_list()
+
         if pyxel.btnp(pyxel.KEY_SPACE):
             self.pause = not self.pause
 
+        if self.pause and pyxel.btn(pyxel.MOUSE_BUTTON_LEFT):
+            self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 1
+        elif self.pause and pyxel.btn(pyxel.MOUSE_BUTTON_RIGHT):
+            self.cell_map[pyxel.mouse_y][pyxel.mouse_x] = 0
+
+        if self.time < self.speed:
+            self.time += 1
+        else:
+            self.time = 0
+
+        if not self.pause and self.time == 0:
+            for y in range(len(self.cell_map)):
+                for x in range(len(self.cell_map[y])):
+                    if y not in [0, pyxel.height - 1] and x not in [0, pyxel.width - 1]:
+                        neighbors = 0
+                        if self.cell_map[y - 1][x] == 1:        neighbors += 1
+                        if self.cell_map[y - 1][x + 1] == 1:    neighbors += 1
+                        if self.cell_map[y][x + 1] == 1:        neighbors += 1
+                        if self.cell_map[y + 1][x + 1] == 1:    neighbors += 1
+                        if self.cell_map[y + 1][x] == 1:        neighbors += 1
+                        if self.cell_map[y + 1][x - 1] == 1:    neighbors += 1
+                        if self.cell_map[y][x - 1] == 1:        neighbors += 1
+                        if self.cell_map[y - 1][x - 1] == 1:    neighbors += 1
+                        
+                        if self.cell_map[y][x] == 1 and neighbors < 2:
+                            self.next_generation[y][x] = 0
+                        elif self.cell_map[y][x] == 1 and neighbors in [2,3]:
+                            self.next_generation[y][x] = 1
+                        elif self.cell_map[y][x] == 1 and neighbors > 3:
+                            self.next_generation[y][x] = 0
+                        elif self.cell_map[y][x] == 0 and neighbors == 3:
+                            self.next_generation[y][x] = 1
+                        else:
+                            self.next_generation[y][x] = self.cell_map[y][x]
+
+            self.cell_map = self.next_generation.copy()
+            self.next_generation = self.create_empty_list()
+
     def draw_game(self):
         pyxel.cls(1)
+
+        for y in range(len(self.cell_map)):
+            for x in range(len(self.cell_map[y])):
+                if self.cell_map[y][x] == 1:
+                    pyxel.pset(x, y, 7)
+
+        pyxel.text(2, 18, f"{self.speed}", 7)
 
         if self.pause:
             pyxel.blt(2, 2, 0, 8, 8, 8, 14, 0)

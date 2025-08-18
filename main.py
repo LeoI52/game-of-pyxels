@@ -1,7 +1,7 @@
 """
 @author : Léo Imbert
 @created : 17/08/2025
-@updated : 17/08/2025
+@updated : 18/08/2025
 """
 
 import random
@@ -630,11 +630,10 @@ class Game:
 
         self.pyxel_manager = PyxelManager(128, 96, scenes, 0)
 
-        self.background = random.choice([0,1,2,3,4,8,9,10])
+        self.background = 1
 
-        self.title = Text("Game of Pyxels", 64, 10, [7,9,10], 1, ANCHOR_TOP, color_mode=RANDOM_COLOR_MODE, color_speed=10, wavy=True, shadow=True, shadow_offset=2)
+        self.title = Text("Game of Pyxels", 64, 10, [7,9,10], 1, ANCHOR_TOP, color_mode=RANDOM_COLOR_MODE, color_speed=10, wavy=True, shadow=True)
         self.play_button = Button("Play", 64, 54, 1, [7,9,10], 5, [7,9,10], 1, True, 10, RANDOM_COLOR_MODE, anchor=ANCHOR_CENTER, command=self.play_action)
-        self.background_button = Button("Background", 64, 74, 1, [7,9,10], 5, [7,9,10], 1, True, 10, RANDOM_COLOR_MODE, anchor=ANCHOR_CENTER, command=self.background_action)
 
         self.pause = True
         self.cell_map = self.create_empty_list()
@@ -652,13 +651,31 @@ class Game:
             for x in range(pyxel.width):
                 lst[y].append(0)
         return lst
+    
+    def create_random_list(self):
+        lst = []
+        for y in range(pyxel.height):
+            lst.append([])
+            for x in range(pyxel.width):
+                lst[y].append(random.randint(0, 1))
+        return lst
+
+    def create_noise_list(self):
+        zoom = random.randint(5, 25)
+        lst = []
+        for y in range(pyxel.height):
+            lst.append([])
+            for x in range(pyxel.width):
+                n = pyxel.noise(x / zoom, y / zoom, pyxel.frame_count / zoom)
+                if n > 0:
+                    lst[y].append(1)
+                else:
+                    lst[y].append(0)
+        return lst
 
     def play_action(self):
         pyxel.play(0, 0)
         self.pyxel_manager.change_scene_dither(1, 0.05, 7)
-
-    def background_action(self):
-        self.background = random.choice([0,1,2,3,4,8,9,10])
 
     def draw_game_cursor(self):
         if self.current_prefab != 0:
@@ -713,14 +730,24 @@ class Game:
     def update_main_menu(self):
         self.title.update()
         self.play_button.update()
-        self.background_button.update()
 
     def draw_main_menu(self):
         pyxel.cls(self.background)
 
+        pyxel.blt(5, 50, 0, 0, 8, 5, 4, 0)
+        pyxel.blt(108, 46, 0, 0, 8, 5, 4, 0)
+        pyxel.blt(20, 26, 0, 0, 8, 5, 4, 0)
+
+        pyxel.blt(40, 70, 0, 0, 16, 3, 3, 0)
+        pyxel.blt(62, 30, 0, 0, 16, 3, 3, 0)
+        pyxel.blt(46, 45, 0, 0, 16, 3, 3, 0)
+
+        pyxel.blt(20, 75, 0, 8, 8, 8, 8, 0)
+        pyxel.blt(92, 77, 0, 8, 8, 8, 8, 0)
+        pyxel.blt(94, 9, 0, 8, 8, 8, 8, 0)
+
         self.title.draw()
         self.play_button.draw()
-        self.background_button.draw()
 
         pyxel.blt(pyxel.mouse_x, pyxel.mouse_y, 0, 0, 0, 8, 8, 0)
 
@@ -735,6 +762,12 @@ class Game:
         if pyxel.btnp(pyxel.KEY_R):
             self.cell_map = self.create_empty_list()
             self.next_generation = self.create_empty_list()
+
+        if pyxel.btnp(pyxel.KEY_X):
+            self.cell_map = self.create_random_list()
+
+        if pyxel.btnp(pyxel.KEY_N):
+            self.cell_map = self.create_noise_list()
 
         if pyxel.btnp(pyxel.KEY_SPACE):
             pyxel.play(0, 0)
